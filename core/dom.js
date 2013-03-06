@@ -271,39 +271,36 @@ define('dom', function(require, exports, module) {
          * 若不存在要替换的class，则添加新class
          */
         replaceClass: function(node, className, newClassName) {
-            var fullClass = node.className,
-                reg0 = new RegExp(' ' + className + ' '),
-                reg1 = new RegExp('^' + className + '$'),
-                reg2 = new RegExp(' ' + className + '$'),
-                reg3 = new RegExp('^' + className + ' ');
-            if (!~fullClass.indexOf(className) && !~fullClass.indexOf(newClassName)) {
-                fullClass += ' ' + newClassName;
-            } else if (reg0.test(fullClass)) {
-                fullClass = fullClass.replace(reg0, ' ' + newClassName + ' ');
-            } else if (reg1.test(fullClass)) {
-                fullClass = fullClass.replace(reg1, newClassName);
-            } else if (reg2.test(fullClass)) {
-                fullClass = fullClass.replace(reg2, ' ' + newClassName);
-            } else if (reg3.test(fullClass)) {
-                fullClass = fullClass.replace(reg3, newClassName + ' ');
-            }
-            node.className = fullClass;
+            common.removeClass(node, className).addClass(node, newClassName);
             return this;
         },
         /**
          * 移除某[几]个class
          */
         removeClass: function(node, className) {
-            common.replaceClass(node, className, '');
+            var reg,
+                fullClass = node.className,
+                classes = className.split(/\s+/);
+            _.each(classes, function(className) {
+                // 对应四种情况：'a', 'a b', 'b a', 'b a c'
+                // 如果要remove的class有重复，将一并去掉
+                reg = new RegExp(' ' + className + ' |' + '^' + className + '$|' + ' ' + className + '$|' + '^' + className + ' ', 'g');
+                fullClass = fullClass.replace(reg, ' ');
+            });
+
+            node.className = fullClass;
             return this;
         },
         /**
          * 添加class
          */
         addClass: function(node, className) {
-            if (!common.hasClass(node, className)) {
-                node.className = node.className + ' ' + className;
-            }
+            var classes = className.split(/\s+/);
+            _.each(classes, function(className) {
+                if (!common.hasClass(node, className)) {
+                    node.className = node.className + ' ' + className;
+                }
+            });
             return this;
         },
         /**
