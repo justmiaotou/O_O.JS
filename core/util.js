@@ -57,8 +57,12 @@ define('util', function(require, exports, module) {
          * To format the query and return as Object
          * @return {Object} the query Object
          */
-        getQuery: function() {
-            var query = !!location.search && location.search.substring(1).split('&'),
+        getQuery: function(search) {
+            if (typeof search == 'undefined') {
+                search = location.search;
+            }
+
+            var query = search && search.substring(1).split('&'),
                 result = {};
 
             if (query) {
@@ -112,7 +116,10 @@ define('util', function(require, exports, module) {
          * @param {Number} num the phone number to validate
          */
         isValidMobileNumber: function(num) {
-            return /^0?(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/.test(num);
+            return /^0?(13[0-9]|15[012356789]|18[02356789]|14[57])[0-9]{8}$/.test(num);
+        },
+        isValidMailAddress: function(addr) {
+            return  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(addr);
         },
         /**
          *  判断浏览器是否安装了flash，安装了则返回版本号
