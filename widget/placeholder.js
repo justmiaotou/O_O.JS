@@ -1,7 +1,8 @@
 define('placeholder', function(require, exports, module) {
     'use strict';
 
-    var $ = M.dom;
+    var $ = require('dom'),
+        _ = require('underscore');
 
     function Placeholder(input, text) {
         input = $(input);
@@ -50,11 +51,14 @@ define('placeholder', function(require, exports, module) {
         function setStyle() {
             var pos = input.position();
 
+            _.each('Top Right Bottom Left'.split(' '), function(dir) {
+                ph.css('padding' + dir, input.css('padding' + dir));
+            });
+
             ph.css({
                 position: 'absolute',
                 top: pos.top + getCssNum('borderTopWidth') + getCssNum('marginTop') + 'px',
                 left: pos.left + getCssNum('borderLeftWidth') + getCssNum('marginLeft') + 'px',
-                padding: input.css('padding'),
                 //width: '100px', //input.width(),
                 fontSize: input.css('fontSize'),
                 fontFamily: input.css('fontFamily'),

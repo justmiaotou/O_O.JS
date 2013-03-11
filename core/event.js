@@ -17,20 +17,71 @@ define('event', function(require, exports, module) {
             node.removeEventListener(type, callback, false);
         };
     } else if (elTester.attachEvent) {
+        /**
+         * IE6/7/8下，attachEvent和detachEvent的回调函数的作用域为window
+         * 为了使作用域为触发节点，可以使用这样的方法：
+         *      node.attachEvent(type, function() {
+         *          callback.apply(node, arguments);
+         *      });
+         * 但作为匿名函数，则无法将该回调函数detach
+         * 于是这里使用这样数据结构来保存用户定义的回调函数与包装后的回调函数的引用：
+         * node[ieEventPatchName] = {
+         *      click: {
+         *          origin: [callback1, callback2],
+         *          wrapped: [wrapped1, wrapped2]
+         *      },
+         *      mouseup: {
+         *          origin: [],
+         *          wrapped: []
+         *      }
+         * }
+         * origin与wrapped数组中的对象分别对应用户定义的与包装后的回调函数，且顺序保持一致
+         * attach的时候使用的是wrapped函数
+         * 这样在detach的时候只要找到origin函数在origin数组中的位置
+         * 就能找到wrapped函数在wrapped数组中的位置
+         * 从而将wrapped函数detach
+         */
+        var ieEventPatchName = 'ieEventHandlerContextPatch';
         addEvent = function(node, type, callback) {
-            node.attachEvent('on' + type, callback);
+            var wrapped = function() {
+                // IE6 的callback函数体内，通过this无法引用到node
+                // 故这里使用apply来修复
+                callback.apply(node, arguments);
+            };
+
+            !node[ieEventPatchName] && (node[ieEventPatchName] = {});
+            !node[ieEventPatchName][type] && (node[ieEventPatchName][type] = {});
+            !node[ieEventPatchName][type]['origin'] && (node[ieEventPatchName][type]['origin'] = []);
+            !node[ieEventPatchName][type]['wrapped'] && (node[ieEventPatchName][type]['wrapped'] = []);
+
+            // 保存用户定义callback以及包装函数wrapped，且他们在各自数组中的索引位置是一样的
+            node[ieEventPatchName][type]['origin'].push(callback);
+            node[ieEventPatchName][type]['wrapped'].push(wrapped);
+
+            node.attachEvent('on' + type, wrapped);
         };
         removeEvent = function(node, type, callback) {
-            node.detachEvent('on' + type, callback);
+            var patch = node[ieEventPatchName],
+                originArr, wrappedArr, index;
+
+            // 没有函数备份说明还未attach这个event，直接返回
+            if (!patch || !patch[type] || !patch[type]['origin']) return;
+
+            originArr = patch[type]['origin'];
+            wrappedArr = patch[type]['wrapped'];
+            for (index = 0, l = originArr.length; index < l; ++index) {
+                if (originArr[index] === callback) break;
+            }
+
+            // origin数组中找不到callback的引用，说明还没有为这个事件类型attach这个callback
+            if (index == originArr.length) return;
+
+            node.detachEvent('on' + type, wrappedArr[index]);
+
+            // detach后将引用删除
+            wrappedArr.splice(index, 1);
+            originArr.splice(index, 1);
         };
-    } else {
-        console.error('do not support addEventListener or attachEvent');
-        /*addEvent = function(node, type, callback) {
-            node['on' + type] = callback;
-        };
-        removeEvent = function(node, type, callback) {
-            node['on' + type] = null;
-        };*/
     }
 
     elTester = null;

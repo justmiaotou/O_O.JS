@@ -35,6 +35,7 @@ define('pop', function(require, exports, module) {
                     hasFooter: true,        // trigger to render the footer
                     draggable: false,       // if the pop draggable TODO
                     body: '',               // body content
+                    extra: '',              // extra content in footer
                     buttons: [              // if given, the default will be override
                         {
                             text: '确定',
@@ -50,7 +51,7 @@ define('pop', function(require, exports, module) {
                 tpls: {
                     header: '<div class="pop-header"><h4><%= title %></h4><a class="pop-cls" href="javascript:void(0)"></a></div>',
                     body: '<div class="pop-body"><%= body %></div>',
-                    footer: '<div class="pop-footer"><div class="btns"><%= buttons %></div></div>',
+                    footer: '<div class="pop-footer"><div class="ext-content"><%= extra %></div><div class="btns"><%= buttons %></div></div>',
                     button: '<a class="ib footer-btn <%= className %>" href="javascript:void(0)"><%= text %></a>',
                     wrapper: '<div class="pop <%= wrapperClass %>" id="<%= wrapperId %>"><%= content %></div>'
                 }
@@ -154,6 +155,7 @@ define('pop', function(require, exports, module) {
 
             function compileFooter() {
                 return _.template(tpls.footer)({
+                    extra: option.extra,
                     buttons: compileBtn()
                 });
             }
