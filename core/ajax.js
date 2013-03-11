@@ -486,7 +486,7 @@ if (typeof JSON !== 'object') {
 }());
 
 define('ajax', function(require, exports, module) {
-    var _ = M.underscore,
+    var _ = M._,
         hasOwn = Object.prototype.hasOwnProperty;
 
     /*========================

@@ -1,11 +1,7 @@
-define('base', function(require, exports, module) {
-    var _ = require('underscore');
-
-    _.extend(M, {
-        underscore: _,
-        ajax: require('ajax'),
-        dom: require('dom'),
-        event: require('event'),
-        util: require('util')
-    });
-});
+// 注意：不要改顺序
+M._ = require('underscore');
+M.sizzle = require('sizzle');
+M.event = require('event'),
+M.dom = require('dom');
+M.ajax = require('ajax'),
+M.util = require('util')

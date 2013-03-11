@@ -2,7 +2,7 @@ define('dom', function(require, exports, module) {
     'use strict';
 
     var $ = M.sizzle,
-        _ = M.underscore,
+        _ = M._,
         E = M.event;
 
     // Borrow from JQuery

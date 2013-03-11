@@ -2,7 +2,7 @@ define('util', function(require, exports, module) {
     'use strict';
 
     var $ = M.dom,
-        _ = M.underscore;
+        _ = M._;
 
     module.exports = {
         /**
