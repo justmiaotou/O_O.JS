@@ -1,5 +1,6 @@
-node_modules/
-*.swp
-*.swo
-pages/
-service/
+*
+
+!core/
+!widget/
+!README.md
+!.gitignore
