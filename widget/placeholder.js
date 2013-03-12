@@ -1,8 +1,8 @@
 define('placeholder', function(require, exports, module) {
     'use strict';
 
-    var $ = require('dom'),
-        _ = require('underscore');
+    var $ = M.dom,
+        _ = M._;
 
     function Placeholder(input, text) {
         input = $(input);

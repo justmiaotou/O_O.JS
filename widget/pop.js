@@ -6,7 +6,7 @@
 define('pop', function(require, exports, module) {
     'use strict';
 
-    var _ = M.underscore,
+    var _ = M._,
         $ = M.dom,
         Mask = M.mask,
         hasOwn = Object.prototype.hasOwnProperty,

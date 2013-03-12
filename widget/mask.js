@@ -1,7 +1,7 @@
 define('mask', function(require, exports, module) {
     'use strict';
 
-    var _ = M.underscore,
+    var _ = M._,
         E = M.event,
         $ = M.dom,
         U = M.util;
