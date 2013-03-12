@@ -1,6 +1,9 @@
-*
-
-!core/
-!widget/
-!README.md
-!.gitignore
+node_modules/
+*.swp
+*.swo
+pages/
+service/
+build/
+qunit/
+Gruntfile.js
+package.json
