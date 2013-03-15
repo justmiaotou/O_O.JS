@@ -1,4 +1,8 @@
 /**
+ * TIP
+ * 1、所有包含`pop-cls`这个className的元素，点击后都会导致浮层隐藏
+ * 2、pop.set('hideMask', boolean)：默认为true。设置为false时，隐藏浮层后不会自动隐藏背景遮罩
+ *
  * TODO List
  * 1、 创建一个对象池保存display:block的浮层，可用于还有浮层没有hide的时候不隐藏mask
  *      同时去除hide函数中第三个用来控制mask是否隐藏的参数，注意要修改sign-pops模块
@@ -8,7 +12,7 @@ define('pop', function(require, exports, module) {
 
     var _ = M._,
         $ = M.dom,
-        Mask = M.mask,
+        Mask = require('mask'),
         hasOwn = Object.prototype.hasOwnProperty,
         E = M.event,
         popId = 0,
@@ -285,9 +289,21 @@ define('pop', function(require, exports, module) {
      *                          if return `false`,the pop will not hide
      */
     Pop.prototype.hide = function(before, after, hideMask) {
+        var setterHideMask = this.get('hideMask');
         if (!before || (before() !== false)) {
             this.pop.style.display = 'none';
-            hideMask !== false && mask.hide();
+
+            // hideMask的优先级要高于setterHideMask
+            // get('hideMask')将在整个生命周期存在（除非再set为undefined）
+            // hideMask只在调用hide函数时临时存在
+            // hideMask只有全等于false时才不隐藏mask
+            if (hideMask !== false) {
+                if (typeof setterHideMask != 'undefined') {
+                    setterHideMask && mask.hide();
+                } else {
+                    mask.hide();
+                }
+            }
         }
         after && after();
     };

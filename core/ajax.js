@@ -486,8 +486,7 @@ if (typeof JSON !== 'object') {
 }());
 
 define('ajax', function(require, exports, module) {
-    var _ = M._,
-        hasOwn = Object.prototype.hasOwnProperty;
+    var _ = M._;
 
     /*========================
      * Ajax 相关
@@ -523,22 +522,18 @@ define('ajax', function(require, exports, module) {
         var xhr = createXHR();
 
         return function (config) {
-            config.method ? (config.method = config.method.toLowerCase()) : (config.method = 'post');
-            config.async || (config.async = true);
-            config.on || (config.on = {});
-            config.arguments || (config.arguments = {});
+            config.method = config.method ? config.method.toLowerCase() : 'post';
+            _.defaults(config, {
+                async: true,
+                on: {},
+                arguments: {}
+            });
 
             var form = config.form,
                 data = form ? serialize(form, config.useDisabled, config.blackList) : '';
             if (config.data) {
-               if (_.isObject(config.data)) {
-                    var tmp = [];
-                    for (var i in config.data) {
-                        if (hasOwn.call(config.data, i)) {
-                            tmp.push(i + '=' + config.data[i]);
-                        }
-                    }
-                    config.data = tmp.join('&');
+                if (_.isObject(config.data)) {
+                    config.data = ajax.param(config.data);
                 }
                 data === '' ? (data = config.data) : (data += '&' + config.data);
             }
@@ -554,7 +549,7 @@ define('ajax', function(require, exports, module) {
 
             if (config.requestHeader) {
                 for (var j in config.requestHeader) {
-                    if (hasOwn.call(config.requestHeader, j)) {
+                    if (_.has(config.requestHeader, j)) {
                         xhr.setRequestHeader(j, config.requestHeader[j]);
                     }
                 }
@@ -682,7 +677,7 @@ define('ajax', function(require, exports, module) {
             if (_.isString(obj)) return obj;
             if (_.isObject(obj) && !_.isArray(obj) && !_.isFunction(obj)) {
                 for (var i in obj) {
-                    if (hasOwn.call(obj, i)) {
+                    if (_.has(obj, i)) {
                         tmp.push(i + '=' + obj[i]);
                     }
                 }

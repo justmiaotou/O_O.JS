@@ -54,6 +54,10 @@ define('mask', function(require, exports, module) {
          * 隐藏mask
          */
         this.hide = function() {
+            if (!$('#' + config.id).length) {
+                return;
+            }
+
             if ($.css(mask, 'position') == 'absolute') {
                 E.off(window, 'scroll', onScroll);
                 E.off(window, 'resize', onResize);

@@ -7,3 +7,5 @@ build/
 qunit/
 Gruntfile.js
 package.json
+.svn/
+.snapshot
