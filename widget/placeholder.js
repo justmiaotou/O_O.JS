@@ -8,8 +8,8 @@ define('placeholder', function(require, exports, module) {
         input = $(input);
         var ph = $.create('<span class="placeholder">' + text + '</span>', true);
         input.after(ph);
-        if (!input.val()) {
-            ph.show();
+        if (!/^\s*$/.test(input.val())) {
+            ph.hide();
         }
         ph.on('click', function() {
             input.focus();
