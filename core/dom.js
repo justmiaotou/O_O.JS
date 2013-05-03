@@ -274,10 +274,12 @@ define('dom', function(require, exports, module) {
         text: function(node, content) {
             if (node.nodeType === 1 || node.nodeType === 9 || node.nodeType === 11) {
                 if (typeof content != 'undefined') {
-                    node.textContent = content;
+                    // IE6/7/8不支持textContent
+                    node.innerHTML = '';
+                    node.appendChild(document.createTextNode(content));
                     return this;
                 }
-                return node.textContent;
+                return node.textContent || node.innerText;
             } else if (node.nodeType === 3 || node.nodeType === 4) {
                 if (typeof content != 'undefined') {
                     node.nodeValue = content;
@@ -298,6 +300,12 @@ define('dom', function(require, exports, module) {
                     return node.getAttribute(key);
                 }
             }
+        },
+        removeAttr: function(node, key) {
+            if (node.nodeType == 1 || node.nodeType == 9 || node.nodeType == 11) {
+                node.removeAttribute(key);
+            }
+            return this;
         },
         /**
          * css(node) 获取node的computedStyle
@@ -500,7 +508,8 @@ define('dom', function(require, exports, module) {
                 }
                 nodes = $(selector, ctx);
             } else if (typeof selector == 'object' &&
-                       (selector.nodeType == 1 || selector.nodeType == 9 || selector.nodeType == 11)) {
+                       (selector.nodeType == 1 || selector.nodeType == 9 || selector.nodeType == 11) ||
+                        selector === window) {
                 nodes = selector;
             } else if (_.isArray(selector)) {
                 nodes = selector;
@@ -631,7 +640,8 @@ define('dom', function(require, exports, module) {
     });
 
     // 只为第一个元素应用某个方法，若该方法返回this，则支持链式调用
-    _.each('isShow contains attr hasClass position offset html text'.split(' '), function(func) {
+    // TODO attr,removeAttr在JQuery是对所有元素生效的
+    _.each('isShow contains attr removeAttr hasClass position offset html text'.split(' '), function(func) {
         FakeNodeList.prototype[func] = function() {
             return DOM[func].apply(this, [this].concat(_.toArray(arguments)));
         };

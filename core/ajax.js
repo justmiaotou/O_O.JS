@@ -486,7 +486,8 @@ if (typeof JSON !== 'object') {
 }());
 
 define('ajax', function(require, exports, module) {
-    var _ = M._;
+    var _ = M._,
+        $ = M.dom;
 
     /*========================
      * Ajax 相关
@@ -702,7 +703,7 @@ define('ajax', function(require, exports, module) {
         },
         /**
          * JSONP({
-         *      id: 'jsonp-id'          // default: 'brick-jsonp-' + (++suffix)
+         *      id: 'jsonp-id'          // default: 'brick-jsonp-' + suffix
          *      url: 'http://host/',
          *      callback: function() {},
          *      callbackKey: 'callbackKey',         // defalut: 'callback'
@@ -711,19 +712,20 @@ define('ajax', function(require, exports, module) {
          *  => <script id="jsonp-id" src="http://host/?callbackKey=jsonpidCallback" charset="utf-8"></script>
          */
         JSONP: (function() {
-            var suffix = 0;
+            var suffix = (new Date()).getTime();
 
             return function(option) {
                 if (!option.url) {
                     return;
                 }
                 // 初始化参数
-                !option.id && (option.id = 'brick-jsonp-' + (++suffix));
+                !option.id && (option.id = 'brick-jsonp-' + suffix);
                 !option.callbackKey && (option.callbackKey = 'callback');
 
                 var scriptEl = $('#' + option.id),
                     callbackName = option.id.replace(/-/g, '') + 'Callback',
-                    head = document.getElementsByTagName('head')[0];
+                    head = document.getElementsByTagName('head')[0],
+                    rKey;
 
                 if (typeof option.callback == 'function') {
                     window[callbackName] = option.callback;
@@ -731,13 +733,17 @@ define('ajax', function(require, exports, module) {
 
                 // 页面上已存在该script，则移除
                 if (scriptEl.length) {
+                    // 将上次添加到window的函数delete
+                    rKey = new RegExp('(?:\\?|&)' + option.callbackKey + '=(\\w+)');
+                    delete window[scriptEl[0].src.match(rKey)[1]];
+
                     scriptEl.remove();
                 }
 
                 // 新建script发送JSONP请求
                 scriptEl = document.createElement('script');
                 scriptEl.id = option.id;
-                scriptEl.src = option.url + (option.url.indexOf('?') ? '&' : '?') + option.callbackKey + '=' + callbackName;
+                scriptEl.src = option.url + (~option.url.indexOf('?') ? '&' : '?') + option.callbackKey + '=' + callbackName + '&t=' + (new Date()).getTime();
                 if (option.charset) {
                     scriptEl.charset = option.charset;
                 }

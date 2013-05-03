@@ -276,9 +276,22 @@ define('pop', function(require, exports, module) {
         if (!this.pop) {
             this.init();
         }
+        var pop = $(this.pop);
         if (!before || (before() !== false)) {
-            this.pop.style.display = 'block';
+            pop.show();
             showMask !== false && mask.show();
+
+            if (window.reqTarget == 'inner') {
+                pop.css({
+                    top: '100px',
+                    left: '100px'
+                });
+            } else {
+                pop.css({
+                    marginTop: -this.pop.clientHeight / 2 + 'px',
+                    marginLeft: -this.pop.clientWidth / 2 + 'px'
+                });
+            }
         }
         after && after();
     };
