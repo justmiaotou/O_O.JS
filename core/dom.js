@@ -101,6 +101,7 @@ define('dom', function(require, exports, module) {
          */
         create: function(tpl, wrapped) {
             var tmpNode,
+                tmpNodeArr,
                 tag, wrapper,
                 fragment = document.createDocumentFragment();
 
@@ -127,9 +128,19 @@ define('dom', function(require, exports, module) {
                 j--;
             }
 
-            tmpNode = tmpNode.childNodes[0].cloneNode(true);
+            if (wrapped) {
+                // 包装为FakeNodeList对象，将所有子节点都返回
+                tmpNodeArr = [];
+                _.each(tmpNode.childNodes, function(node) {
+                    tmpNodeArr.push(node);
+                });
+                tmpNode = DOM(tmpNodeArr);
+            } else {
+                // 返回原生对象，则只返回第一个子节点
+                tmpNode = tmpNode.childNodes[0].cloneNode(true);
+            }
 
-            return wrapped ? DOM(tmpNode) : tmpNode;
+            return tmpNode;
         },
         /**
          * 删除节点

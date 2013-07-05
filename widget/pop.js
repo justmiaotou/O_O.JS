@@ -37,7 +37,8 @@ define('pop', function(require, exports, module) {
                     root: document.body,    // the node that pop append to
                     hasHeader: true,        // trigger to render the header
                     hasFooter: true,        // trigger to render the footer
-                    draggable: false,       // if the pop draggable TODO
+                    hasClose: true,         // if show the close btn in header
+                    draggable: true,        // if the pop draggable
                     body: '',               // body content
                     extra: '',              // extra content in footer
                     buttons: [              // if given, the default will be override
@@ -75,7 +76,8 @@ define('pop', function(require, exports, module) {
         this.pop = null;
         this.init = function() {
             var option = config.option,
-                step;
+                step,
+                pop;
             if (option.before && !option.before()) {
                 return;
             }
@@ -109,8 +111,10 @@ define('pop', function(require, exports, module) {
 
             option.hasFooter && addBtnEvent(option.buttons);
 
+            pop = $(this.pop);
+
             // delegate to the element that has `.pop-cls` to close the pop
-            $(this.pop).delegate('.pop-cls, .footer-btn', 'click', function(e) {
+            pop.delegate('.pop-cls, .footer-btn', 'click', function(e) {
                 // prevent trigger the `onbeforeunload` event
                 E.preventDefault(e);
                 if ($.hasClass(this, 'pop-cls')) {
@@ -118,10 +122,7 @@ define('pop', function(require, exports, module) {
                 }
             });
 
-            // if draggable, add the drag effact
-            if (option.draggable) {
-                drag($('.pop-header', this.pop), this.pop);
-            }
+            initStep(option);
 
             addStepClass();
             option.after && option.after();
@@ -233,12 +234,29 @@ define('pop', function(require, exports, module) {
                 stepCount = index;
                 _this.pop.innerHTML = stepTpls[stepCount];
                 option.hasFooter && addBtnEvent(option.buttons);
+
+                initStep(option);
                 addStepClass();
 
                 option.after && option.after();
                 callback && callback();
             };
         }
+
+        // 每个步骤刷新时必须执行的初始化
+        // 需要针对步骤内容的初始化要加在这里，不能加在init函数里
+        function initStep(option) {
+            var pop = $(_this.pop);
+            // if draggable, add the drag effact
+            if (option.draggable) {
+                drag($('.pop-header', pop), pop);
+            }
+
+            if (option.hasClose === false) {
+                pop.children('.pop-header .pop-cls').hide();
+            }
+        }
+
         function addStepClass() {
             var body;
             if (_this.pop) {
@@ -281,19 +299,21 @@ define('pop', function(require, exports, module) {
             pop.show();
             showMask !== false && mask.show();
 
-            if (window.reqTarget == 'inner') {
-                pop.css({
-                    top: '100px',
-                    left: '100px'
-                });
-            } else {
-                pop.css({
-                    marginTop: -this.pop.clientHeight / 2 + 'px',
-                    marginLeft: -this.pop.clientWidth / 2 + 'px'
-                });
-            }
+            this.adjustPosition();
         }
         after && after();
+    };
+
+    Pop.prototype.adjustPosition = function() {
+        var pop = $(this.pop);
+
+        pop.css('marginLeft', -this.pop.clientWidth / 2 + 'px');
+
+        if (window.reqTarget == 'inner') {
+            pop.css({ top: '100px' });
+        } else {
+            pop.css({ marginTop: -this.pop.clientHeight / 2 + 'px' });
+        }
     };
 
     /**

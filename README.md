@@ -35,3 +35,15 @@
 	 |	  ╱		  |
 	 |	╱		  |
 	core ----→ widget
+
+-------
+OO
+inherit, extend
+
+Event
+on, emit
+
+Data
+
+Unit Test
+ajax: NodeJs

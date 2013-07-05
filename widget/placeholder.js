@@ -24,6 +24,7 @@ define('placeholder', function(require, exports, module) {
                 ph.show();
             }
         });
+
         setStyle();
 
         /**

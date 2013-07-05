@@ -541,7 +541,8 @@ define('ajax', function(require, exports, module) {
 
             // XHR对象重用小技巧：open放在onreadystatechange事件之前
             // http://keelypavan.blogspot.com/2006/03/reusing-xmlhttprequest-object-in-ie.html
-            xhr.open(config.method, config.url, false);//config.async);
+            // 若第三个参数为false，在chrome下得到的xhr.responseText中的中文为乱码。到v27仍有这个问题，原因不明。
+            xhr.open(config.method, config.url, true);//config.async);
 
             // 对于post请求，都模拟为form请求
             if (form || config.method == 'post') {
@@ -719,25 +720,29 @@ define('ajax', function(require, exports, module) {
                     return;
                 }
                 // 初始化参数
-                !option.id && (option.id = 'brick-jsonp-' + suffix);
-                !option.callbackKey && (option.callbackKey = 'callback');
+                option.id = option.id || ('brick-jsonp-' + suffix);
+                option.callbackKey = option.callbackKey || 'callback';
 
                 var scriptEl = $('#' + option.id),
-                    callbackName = option.id.replace(/-/g, '') + 'Callback',
+                    callbackName = option.id.replace(/-/g, '') + 'Callback' + suffix,
                     head = document.getElementsByTagName('head')[0],
                     rKey;
 
-                if (typeof option.callback == 'function') {
-                    window[callbackName] = option.callback;
-                }
-
                 // 页面上已存在该script，则移除
                 if (scriptEl.length) {
-                    // 将上次添加到window的函数delete
+                    // 将上次添加到window的函数delete，释放内存
                     rKey = new RegExp('(?:\\?|&)' + option.callbackKey + '=(\\w+)');
-                    delete window[scriptEl[0].src.match(rKey)[1]];
+
+                    try{
+                        // TODO IE8 下出错
+                        delete window[scriptEl[0].src.match(rKey)[1]];
+                    } catch(e) {}
 
                     scriptEl.remove();
+                }
+
+                if (typeof option.callback == 'function') {
+                    window[callbackName] = option.callback;
                 }
 
                 // 新建script发送JSONP请求

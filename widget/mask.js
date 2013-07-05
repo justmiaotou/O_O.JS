@@ -9,7 +9,7 @@ define('mask', function(require, exports, module) {
     module.exports = function(config) {
         var defaultConfig = {
             id: 'brick-mask',
-            zIndex: 100,
+            zIndex: 1000,
             root: document.body
         };
         config = _.extend(defaultConfig, config);
@@ -30,6 +30,7 @@ define('mask', function(require, exports, module) {
 
             mask.style.zIndex = num;
         };
+
         /**
          * 显示mask
          */
@@ -38,7 +39,7 @@ define('mask', function(require, exports, module) {
                 return;
             }
 
-            $.append(document.body, mask);
+            $.append(config.root, mask);
 
             this.setZIndex(config.zIndex);
 
@@ -50,6 +51,7 @@ define('mask', function(require, exports, module) {
                 E.on(window, 'resize', onResize);
             }
         };
+
         /**
          * 隐藏mask
          */
