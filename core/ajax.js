@@ -680,7 +680,7 @@ define('ajax', function(require, exports, module) {
             if (_.isObject(obj) && !_.isArray(obj) && !_.isFunction(obj)) {
                 for (var i in obj) {
                     if (_.has(obj, i)) {
-                        tmp.push(i + '=' + obj[i]);
+                        tmp.push(i + '=' + encodeURIComponent(obj[i]));
                     }
                 }
             }
@@ -695,6 +695,9 @@ define('ajax', function(require, exports, module) {
             ajax({
                 url: url
                 , data: this.param(data)
+                , requestHeader: {
+                    'IS-AJAX': true
+                }
                 , on: {
                     complete: function(data, xhr) {
                         success(data, xhr); 

@@ -4,7 +4,8 @@ define('event', function(require, exports, module) {
 
     var elTester = document.createElement('div'),
         addEvent,
-        removeEvent;
+        removeEvent,
+        uglyEventPollyfill; // 对IE 6/7/8 事件对象进行处理
     // 通过探测特性来初始化事件函数
     // IE6/7/8在使用node.onclick这种方式添加监听函数时，
     // 只能通过window.event来获得事件对象。只要使用attachEvent
@@ -42,10 +43,30 @@ define('event', function(require, exports, module) {
          * 从而将wrapped函数detach
          */
         var ieEventPatchName = 'ieEventHandlerContextPatch';
+
+        uglyEventPollyfill = function (e) {
+            if (!e.relatedTarget) {
+                e.relatedTarget = e.toElement || e.fromElement;
+            }
+            if (!e.stopPropagation) {
+                e.stopPropagation = function () {
+                    e.cancelBubble = true;
+                };
+            }
+            if (!e.preventDefault) {
+                e.preventDefault = function () {
+                    e.returnValue = false;
+                };
+            }
+            if (!e.target) {
+                e.target = e.srcElement;
+            }
+        };
+
         addEvent = function(node, type, callback) {
-            var wrapped = function() {
-                // IE6 的callback函数体内，通过this无法引用到node
-                // 故这里使用apply来修复
+            var wrapped = function(e) {
+                uglyEventPollyfill(e);
+
                 callback.apply(node, arguments);
             };
 
@@ -60,6 +81,7 @@ define('event', function(require, exports, module) {
 
             node.attachEvent('on' + type, wrapped);
         };
+
         removeEvent = function(node, type, callback) {
             var patch = node[ieEventPatchName],
                 originArr, wrappedArr, index;
@@ -84,48 +106,8 @@ define('event', function(require, exports, module) {
         };
     }
 
+    // 释放对象
     elTester = null;
-
-    /**
-     * 获得事件对象
-     * @param {Event} event
-     */
-    function formatEvent(event) {
-        event = event || window.event;
-        // 严格模式下不允许为不可编辑对象赋值
-        //event.target = event.target || event.srcElement;
-        return event;
-    }
-
-    /**
-     * 获得mouseover、mouseout事件中的关联元素
-     * @param {Event} event
-     */
-    function getRelatedTarget(event) {
-        if (event.relatedTarget) {
-            return event.relatedTarget;
-        } else if (event.toElement) {
-            return event.toElement;
-        } else if (event.fromElement) {
-            return event.fromElement;
-        }
-    }
-
-    function stopPropagation(e) {
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
-    }
-
-    function preventDefault(e) {
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-    }
 
     // https://github.com/addyosmani/jquery.parts/blob/master/jquery.documentReady.js
     var ready = (function( window ) {
@@ -247,24 +229,21 @@ define('event', function(require, exports, module) {
                 removeEvent(node, type, callback);
             });
         },
-        fire: function() {
+        fire: function(node, type) {
 
         },
         delegate: function(node, selector, type, callback) {
             var _this = this;
             this.on(node, type, function(e) {
-                var target = _this.getTarget(e);
-                if (sizzle.matchesSelector(target, selector)) {
-                    callback && callback.call(target, e);
+                if (sizzle.matchesSelector(e.target, selector)) {
+                    callback && callback.call(e.target, e);
                 }
             });
         },
         ready: ready,
-        getTarget: function(evt) {
-            return evt.target || evt.srcElement;
-        },
-        getRelatedTarget: getRelatedTarget,
-        stopPropagation: stopPropagation,
-        preventDefault: preventDefault
+        stop: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
     };
 });

@@ -197,6 +197,7 @@ define('util', function(require, exports, module) {
 
             target[opt.isAppend === false ? 'prepend' : 'append'](ndLoading);
 
+            // IE6
             ndLoading.css('height', target[0].clientHeight + 'px');
 
             var img = ndLoading.children('img');

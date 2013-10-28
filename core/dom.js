@@ -188,6 +188,7 @@ define('dom', function(require, exports, module) {
             } else {
                 common.removeClass(node, VISIBLE).addClass(node, HIDDEN);
             }
+            return this;
         },
         isShow: function(node) {
             return common.css(node, 'display') === 'block';
@@ -368,7 +369,7 @@ define('dom', function(require, exports, module) {
             _.each(classes, function(className) {
                 // 对应四种情况：'a', 'a b', 'b a', 'b a c'
                 // 如果要remove的class有重复，将一并去掉
-                reg = new RegExp(' ' + className + ' |' + '^' + className + '$|' + ' ' + className + '$|' + '^' + className + ' ', 'g');
+                reg = new RegExp('(^|\\s)' + className + '(\\s|$)', 'g');
                 fullClass = fullClass.replace(reg, ' ');
             });
 
@@ -403,7 +404,7 @@ define('dom', function(require, exports, module) {
                 elemStyle;
 
             elemStyle = common.css(elem);
-            // fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
+            // fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it's only offset parent
             if (elemStyle.position === 'fixed') {
                 // we assume that getBoundingClientRect is available when computed position is fixed
                 offset = elem.getBoundingClientRect();

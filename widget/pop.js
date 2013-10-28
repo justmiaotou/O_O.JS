@@ -45,7 +45,7 @@ define('pop', function(require, exports, module) {
                         {
                             text: '确定',
                             click: function(e) {
-                                E.preventDefault(e);
+                                e.preventDefault();
                                 _this.hide();
                             }
                         }
@@ -116,7 +116,7 @@ define('pop', function(require, exports, module) {
             // delegate to the element that has `.pop-cls` to close the pop
             pop.delegate('.pop-cls, .footer-btn', 'click', function(e) {
                 // prevent trigger the `onbeforeunload` event
-                E.preventDefault(e);
+                e.preventDefault();
                 if ($.hasClass(this, 'pop-cls')) {
                     _this.hide();
                 }
@@ -372,14 +372,14 @@ define('pop', function(require, exports, module) {
             doc.on('mouseup', upHandler);
         });
         function moveHandler(e) {
-            E.stopPropagation(e);
+            e.stopPropagation();
             target.css({
                 left: targetOffset.left + (e.clientX - startX) + 'px',
                 top: targetOffset.top + (e.clientY - startY) + 'px'
             });
         }
         function upHandler(e) {
-            E.stopPropagation(e);
+            e.stopPropagation();
             document.onselectstart = function() {return true;};
             document.ondragstart = function() {return true;};
             doc.off('mousemove', moveHandler);
